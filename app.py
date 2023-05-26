@@ -9,8 +9,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 # Socket object
-# async_mode = None
-socketio = SocketIO(app, async_mode=async_mode)
+socketio = SocketIO(app)
 
 # Image processing object
 measure_from_video = image_processing.measure_from_video.MeasureFromVideo('../Data/Videos_pendule/filename1.avi')
@@ -126,7 +125,7 @@ def mesure():
     # Check if a user is connected
     if ('username' in session) and (ip_save == request.remote_addr) :
         # Display mesure web page
-        return render_template("mesure.html",sync_mode=socketio.async_mode)
+        return render_template("mesure.html")
     else:
         # Redirect user to login web page
         return redirect(url_for('login'))
