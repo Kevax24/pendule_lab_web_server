@@ -144,6 +144,7 @@ def get_Values():
 # Get data in csv file
 @app.route("/getPlotCSV")
 def getPlotCSV():
+    # Check if a user is connected
     if ('username' in session) and (ip_save == request.remote_addr) :
         with open("mesure.csv") as fp:
             csv = fp.read()
@@ -152,13 +153,21 @@ def getPlotCSV():
             mimetype="text/csv",
             headers={"Content-disposition":"attachment; filename=mesure.csv"})
     else:
+        # Redirect user to login web page
         return redirect(url_for('login'))
+
 
 # Get the data from the measure class
 @app.route('/data')
 def get_data():
-    data = measure_from_video.signal
-    return jsonify(data)
+    # Check if a user is connected
+    if ('username' in session) and (ip_save == request.remote_addr) :
+        data = measure_from_video.signal
+        return jsonify(data)
+    else:
+        # Redirect user to login web page
+        return redirect(url_for('login'))
+
 
 # Background task
 @socketio.on('run', namespace='/backgroundTasks')
