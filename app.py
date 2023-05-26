@@ -13,7 +13,7 @@ async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
 
 # Image processing object
-measure_from_video = image_processing.measure_from_video.MeasureFromVideo('../Data/Videos_pendule/filename1.avi')
+measure_from_video = image_processing.measure_from_video.MeasureFromVideo('data/videos_pendule/video_robustness.avi')
 
 # Global variables
 ip_login = None
@@ -242,4 +242,4 @@ def disconnect():
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    socketio.run(app, debug=True)
+    socketio.run(app)

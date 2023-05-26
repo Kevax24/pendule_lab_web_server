@@ -50,8 +50,8 @@ class MeasureFromVideo:
         print("The signal was successfully saved")
 
 def start_video_processing():
-    # measure_from_video = MeasureFromVideo('../Data/Videos_pendule/WIN_20230322_17_15_43_Pro.mp4')
-    measure_from_video = MeasureFromVideo('../Data/Videos_pendule/filename1.avi')
+    # measure_from_video = MeasureFromVideo('data/videos_pendule/video_clean.mp4')
+    measure_from_video = MeasureFromVideo('data/videos_pendule/video_robustness.avi')
     measure_from_video.run()
 
 if __name__ == "__main__":
