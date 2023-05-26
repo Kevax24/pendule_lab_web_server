@@ -1,0 +1,5 @@
+Flask
+flask-wtf
+pytest
+pytest-cov
+opencv-python

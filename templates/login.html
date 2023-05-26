@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{{ url_for('login') }}" method="POST">
+    <div class="login">
+        <h1>Connexion</h1>
+        <p><input type="text" name="username" value="" placeholder="Nom d'utilisateur" required></p>
+        <p><input type="password" name="password" value="" placeholder="Mot de passe" required></p>
+        <p class="submit"><input type="submit" name="commit" value="Se connecter"></p>
+    </div>
+</form>
+
+<script>
+    if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
+</script>
+{% endblock %}

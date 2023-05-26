@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Mesure</h1>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- Plot division -->
+<div id="plot" style="width: 75%;display:none;">
+    <canvas id="myChart"></canvas>
+</div>
+
+<!-- Message division -->
+<div id="messages"></div>
+
+<!-- Progress bar division -->
+<div id="progress" style="display:none">
+    <div id="progressBar"></div>
+</div>
+
+<!-- Start division -->
+<div id="startDiv" style="display:none">
+    <p>
+        <!-- Bouton de démarrage d'acquisition -->
+        <input type="submit" value="Démarrer" id="btnStart">
+        <!-- Champ de type "password" -->
+        <label for="nbr">Temps d'acquisition [s] : </label>
+        <input type="number" value="10" name="time_acq" id="time_acq" min="10" max="300" required>
+    </p>
+</div>
+
+<!-- Stop division -->
+<div id="stopDiv" style="display:none">
+    <p>
+        <!-- Bouton de stoppage d'acquisition -->
+        
+        <div id="acqRunning">
+            <input type="submit" value="Stopper"  id="btnStop">
+            Acquisition en cours...
+        </div>
+        <div id="acqDone" style="display:none">
+            <input type="submit" value="Stopper"  id="btnStop">
+            Acquisition terminée, fin de traitement en cours...
+        </div>
+    </p>
+</div>
+
+<div id="dlLink"></div>
+
+
+<script type="text/javascript" charset="utf-8">
+    // global chart variable
+    var chart
+    var _plotReady
+
+    $(document).ready(function() {
+        namespace = '/backgroundTasks';
+        var socket = io(namespace);
+
+        // Wait for the variable values to be updated and execute the instructions
+        $.ajax({
+            url: '/getValues',
+            type: 'POST',
+            contentType: 'application/json',
+            success: function(response) {
+                // Show graph if acquisition has already done
+                if (response._plotReady) {
+                    showGraph();
+                }
+
+                // Show state of buttons
+                if (response._btnState) {
+                    // Visible start button
+                    showStartBtn();
+                }
+                else {
+                    // Visible stop button
+                    showStopBtn();
+                }
+
+                // 
+                if (response._running) {
+                    console.log("running");
+                    document.getElementById('progress').style.display = 'block';
+                    countdownTimer();
+                    refreshGraph();
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+
+        // Start button clicked
+        $('#btnStart').click(function() {
+            countdownTimer();
+
+            // Update text displayed
+            document.getElementById('acqRunning').style.display = 'block';
+            document.getElementById('acqDone').style.display = 'none';
+
+            // Hide plot and csv link
+            document.getElementById('plot').style.display = 'none';
+            document.getElementById('dlLink').style.display = 'none';
+
+            // Hide disconnect button
+            document.getElementById('logout').style.display = 'none';
+
+            // Update visibility of buttons
+            showStopBtn();
+
+            // Start displaying the graph
+            showGraph();
+
+            // Get time of acquisition
+            var timeValue = document.getElementById('time_acq').value
+
+            // Wait for the variable values to be updated and execute the instructions
+            $.ajax({
+                url: '/getValues',
+                type: 'POST',
+                contentType: 'application/json',
+                success: function(response) {
+                    // Refresh periodically the graph with the new data
+                    refreshGraph();
+
+                    // Emit background task
+                    socket.emit('run', {duration: timeValue});
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });  
+        });
+
+        // Stop button clicked
+        $('#btnStop').click(function() {
+            // Stop countdown timer
+            stopTimer();
+
+            // Show disconnect button
+            document.getElementById('logout').style.display = 'block';
+
+            // Show csv link
+            document.getElementById('dlLink').style.display = 'block';
+
+            // Update visibility of buttons
+            showStartBtn();
+
+            // Emit background task
+            socket.emit('stop');
+        });
+
+        // Acquisition background task finished
+        socket.on('task_done', function() {
+            // Stop countdown timer
+            stopTimer();
+
+            // Show disconnect button
+            document.getElementById('logout').style.display = 'block';
+
+            // Show csv link
+            document.getElementById('dlLink').style.display = 'block';
+
+            // Show graph
+            showGraph();
+
+            // Update visibility of buttons
+            showStartBtn();
+        });
+    });
+</script>
+
+<script type="text/javascript" charset="utf-8">
+    // Show graph after acquisition and processing
+    function showGraph() {
+        // Display plot
+        document.getElementById('plot').style.display = 'block';
+
+        // Get chart ID
+        const ctx = document.getElementById('myChart');
+        const chartData = "/getPlotCSV";
+
+        // Read csv file
+        // d3.csv(chartData).then(makeChart);
+        d3.json('/data').then(makeChart);
+
+        // Plot graphic
+        function makeChart(datapoints) {
+            var timeData = datapoints.map(function(d) {return d[1]});
+            var amplitudeData = datapoints.map(function(d) {return d[0]});
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeData,
+                    datasets: [{
+                        label: 'Amplitude',
+                        data: amplitudeData,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Temps [s]'
+                            },
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Amplitude'
+                            },
+                        }
+                    },
+                },
+            });
+        }
+
+        // Display link for download csv file
+        document.getElementById("dlLink").innerHTML =
+        "<a href=\"{{ url_for('getPlotCSV') }}\">Télécharger les données</a>";
+    }
+
+    // Enable start button and disable stop button
+    function showStartBtn() {
+        document.getElementById('startDiv').style.display = 'block';
+        document.getElementById('stopDiv').style.display = 'none';
+    }
+
+    // Enable stop button and disable start button
+    function showStopBtn() {
+        document.getElementById('startDiv').style.display = 'none';
+        document.getElementById('stopDiv').style.display = 'block';
+    }
+    // Update the current graph with new data
+    function updateChart() { 
+        d3.json('/data').then(_updateChart);
+
+        function _updateChart(datapoints) {
+            var timeData = datapoints.map(function(d) {return d[1]});
+            var amplitudeData = datapoints.map(function(d) {return d[0]});
+            
+            chart.data.datasets[0].data = amplitudeData;
+            chart.data.labels = timeData;
+            chart.update();
+        }
+    };
+
+    // Refresh the whole graph periodically
+    function refreshGraph() {
+        showGraph();
+        setInterval(function() {
+            updateChart();
+        }, 200);
+    }
+</script>
+
+<!-- Countdown timer script -->
+<script>
+    var timer
+
+    // Update the count down every 0.1 second
+    function countdownTimer() {
+        // Show progress bar
+        document.getElementById('progress').style.display = 'block';
+
+        // Set the date we're counting down to
+        var countDownSecond = document.getElementById('time_acq').value;
+        let width = 0;
+
+        // Check if the current progressBar width has been previously saved (to retrieve the value in case of a page refresh)
+        var saved_width = Number(localStorage.getItem('saved_width'));
+        if(saved_width == null) {
+            localStorage.setItem('saved_width', width);
+        } else {
+            width = saved_width;
+        }
+
+        // Set step for increment width
+        const step = 10/countDownSecond
+
+        timer = setInterval(function() {
+            if (width >= 100) {
+                // Update text displayed
+                document.getElementById('acqRunning').style.display = 'none';
+                document.getElementById('acqDone').style.display = 'block';
+
+                // Stop countdown timer
+                stopTimer();
+            } else {
+                // Increment progress bar
+                width = width + step;
+
+                // Update progress bar
+                document.getElementById("progressBar").style.width = width + '%';
+
+                // Save "width" value in localStorage (prevent refresh)
+                localStorage.setItem('saved_width', width);
+            }
+        }, 100);
+    }
+
+    // Stop the count down
+    function stopTimer() {
+        // Reset countdown timer
+        clearInterval(timer);
+
+        // Reset progress bar
+        document.getElementById("progressBar").style.width = 0;
+        document.getElementById('progress').style.display = 'none';
+
+        // Remove "width" value of localStorage
+        localStorage.removeItem("saved_width");
+    }
+</script>
+{% endblock %}

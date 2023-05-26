@@ -1,0 +1,73 @@
+body {
+    font: 13px/20px "Lucida Grande", Tahoma, Verdana, sans-serif;
+    background-color:aliceblue;
+    margin: 0;
+}
+
+#navbar {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    background-color: lightskyblue;
+    font-size: 1.1em;
+    color: #333;
+}
+
+#navbar-items {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    width: 100%;
+}
+
+.navbar-item {
+    margin: 0 10px;
+}
+
+.navbar-item.login-logout {
+    margin-left: auto;
+}
+
+.navbar-item a {
+    text-decoration: none;
+    display: block;
+    color: #333;
+    font-weight: bold;
+}
+
+.navbar-item a:hover {
+    color: #fcfcfc;
+}
+
+#container {
+    margin: 20px 50px;
+}
+
+#navbar .header_logo{
+    position: absolute;
+    left: 48.5%;
+}
+
+#navbar .foot_copyright{
+    text-align: center;
+}
+
+#navbar .foot_logo{
+    position: absolute;
+    right: 0px;
+}
+
+#progress {
+    width: 100%;
+    height: 30px;
+    position: relative;
+    background-color: #ddd;
+}
+  
+#progressBar {
+    background-color: #4CAF50;
+    width: 0px;
+    height: 30px;
+    position: absolute;
+}

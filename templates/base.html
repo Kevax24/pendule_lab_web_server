@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendule labs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var socket = io();
+        socket.on('connect', function() {});
+    </script>
+</head>
+<body>
+    <nav id="navbar">
+        <a target="_blank" href="https://www.he-arc.ch"><img src="{{ url_for('static', filename='img/He_arc_Logo_RGB.png') }}" alt="logo" width="150"></a>
+        
+        <div class="header_logo">
+            <img src="{{ url_for('static', filename='img/clock.png') }}" alt="logo" width="50">
+        </div>
+        <ul id="navbar-items">
+            <li class="navbar-item login-logout">
+                {% if session['username'] %}
+                    <form id="logout" action="{{ url_for('logout') }}" method="POST">
+                        <a href="javascript:;" onclick="document.getElementById('logout').submit();">Se déconnecter</a>
+                    </form>
+                {% endif %}
+            </li>
+        </ul> 
+    </nav>
+    
+    <div id="container">
+        {% block content %}{% endblock %}
+    </div>
+
+     <!-- Footer -->
+    <footer id="navbar">
+        <div class="foot_copyright">
+            <p>© 2023 HES-SO Master - PI Contrôle horlogerie</p>
+        </div>
+
+        <div class="foot_logo">
+            <a target="_blank" href="https://www.hes-so.ch"><img src="{{ url_for('static', filename='img/HES_SO_Logo_RGB.png') }}" alt="logo" width="200"></a>
+        </div>
+    </footer>
+</body>
+</html>
