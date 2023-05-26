@@ -9,22 +9,28 @@ class MeasureFromVideo:
         Get the video informations.
         '''
         self.video_file = video_file
+        self.count = 0
+        self.signal = []
         
     def early_stopping(self):
         '''
         This function can be called to stop the acquisition earlier.
         '''
         self.state = False
+
+        # Truncate the signal at the current time
+        self.signal = self.signal[:self.count]
         
     def run(self):
         '''
         This function read every image of the video and detect the angle of the pendulum.
         '''
-        count = 0
-        self.signal = []
+        self.count = 0
         angle_detection = AngleDetection()
         vidcap = cv2.VideoCapture(self.video_file)
         fps = vidcap.get(cv2.CAP_PROP_FPS)
+        frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.signal = [[None, round(f / fps, 3)] for f in range(frame_count)]    # Initialize the signal with the good size
         self.state = True   # State of the video measuring
         
         success,image = vidcap.read()
@@ -32,9 +38,9 @@ class MeasureFromVideo:
         while success and self.state:
             edges = angle_detection.preprocess_image(image)
             angle_deg = angle_detection.detect_lines(image, edges)
-            time_sec = round(count / fps, 3)
-            self.signal.append([angle_deg, time_sec])
-            count += 1
+            time_sec = round(self.count / fps, 3)
+            self.signal[self.count] = [angle_deg, time_sec]
+            self.count += 1
             success,image = vidcap.read()
   
         vidcap.release()
@@ -44,8 +50,8 @@ class MeasureFromVideo:
         print("The signal was successfully saved")
 
 def start_video_processing():
-    # measure_from_video = MeasureFromVideo('data/videos_pendule/video_clean.mp4')
-    measure_from_video = MeasureFromVideo('data/videos_pendule/video_robustness.avi')
+    # measure_from_video = MeasureFromVideo('../Data/Videos_pendule/WIN_20230322_17_15_43_Pro.mp4')
+    measure_from_video = MeasureFromVideo('../Data/Videos_pendule/filename1.avi')
     measure_from_video.run()
 
 if __name__ == "__main__":

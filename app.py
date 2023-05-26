@@ -9,10 +9,11 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 # Socket object
-socketio = SocketIO(app)
+async_mode = None
+socketio = SocketIO(app, async_mode=async_mode)
 
 # Image processing object
-measure_from_video = image_processing.measure_from_video.MeasureFromVideo('data/videos_pendule/video_robustness.avi')
+measure_from_video = image_processing.measure_from_video.MeasureFromVideo('../Data/Videos_pendule/filename1.avi')
 
 # Global variables
 ip_login = None
@@ -125,7 +126,7 @@ def mesure():
     # Check if a user is connected
     if ('username' in session) and (ip_save == request.remote_addr) :
         # Display mesure web page
-        return render_template("mesure.html")
+        return render_template("mesure.html",sync_mode=socketio.async_mode)
     else:
         # Redirect user to login web page
         return redirect(url_for('login'))
@@ -193,9 +194,11 @@ def stop_task():
     try:
         global btnState
         global running
+        global plotReady
         
         btnState = True
         running = False
+        plotReady = True
 
         # Stop measures from video
         measure_from_video.early_stopping()
@@ -230,4 +233,4 @@ def disconnect():
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    socketio.run(app)
+    socketio.run(app, debug=True)

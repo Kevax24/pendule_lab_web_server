@@ -47,7 +47,9 @@
     </p>
 </div>
 
-<div id="dlLink"></div>
+<div id="dlLink" style="display:none">
+    <a href={{ url_for('getPlotCSV') }}>Télécharger les données</a>
+</div>
 
 
 <script type="text/javascript" charset="utf-8">
@@ -82,9 +84,8 @@
 
                 // 
                 if (response._running) {
-                    console.log("running");
-                    document.getElementById('progress').style.display = 'block';
                     countdownTimer();
+                    showGraph();
                     refreshGraph();
                 }
             },
@@ -102,7 +103,7 @@
             document.getElementById('acqDone').style.display = 'none';
 
             // Hide plot and csv link
-            document.getElementById('plot').style.display = 'none';
+            // document.getElementById('plot').style.display = 'none';
             document.getElementById('dlLink').style.display = 'none';
 
             // Hide disconnect button
@@ -123,11 +124,11 @@
                 type: 'POST',
                 contentType: 'application/json',
                 success: function(response) {
-                    // Refresh periodically the graph with the new data
-                    refreshGraph();
-
                     // Emit background task
                     socket.emit('run', {duration: timeValue});
+                    
+                    // Refresh periodically the graph with the new data
+                    refreshGraph();
                 },
                 error: function(error) {
                     console.log(error);
@@ -143,14 +144,16 @@
             // Show disconnect button
             document.getElementById('logout').style.display = 'block';
 
-            // Show csv link
-            document.getElementById('dlLink').style.display = 'block';
+            // Show download button
+            document.getElementById("dlLink").style.display = 'block';
 
             // Update visibility of buttons
             showStartBtn();
 
             // Emit background task
             socket.emit('stop');
+            
+            updateChart();
         });
 
         // Acquisition background task finished
@@ -161,19 +164,19 @@
             // Show disconnect button
             document.getElementById('logout').style.display = 'block';
 
-            // Show csv link
-            document.getElementById('dlLink').style.display = 'block';
-
-            // Show graph
-            showGraph();
+            // Show download button
+            document.getElementById("dlLink").style.display = 'block';
 
             // Update visibility of buttons
             showStartBtn();
+            
+            updateChart();
         });
     });
 </script>
 
 <script type="text/javascript" charset="utf-8">
+    var updateGraph
     // Show graph after acquisition and processing
     function showGraph() {
         // Display plot
@@ -181,11 +184,15 @@
 
         // Get chart ID
         const ctx = document.getElementById('myChart');
-        const chartData = "/getPlotCSV";
+        const chartData = "/data";
 
         // Read csv file
-        // d3.csv(chartData).then(makeChart);
-        d3.json('/data').then(makeChart);
+        d3.json(chartData).then(makeChart);
+
+        // Destroy previous chart
+        if (chart) {
+            chart.destroy()
+        }
 
         // Plot graphic
         function makeChart(datapoints) {
@@ -221,13 +228,12 @@
                             },
                         }
                     },
+                    animations: {
+                        duration: 0
+                    },
                 },
             });
         }
-
-        // Display link for download csv file
-        document.getElementById("dlLink").innerHTML =
-        "<a href=\"{{ url_for('getPlotCSV') }}\">Télécharger les données</a>";
     }
 
     // Enable start button and disable stop button
@@ -242,7 +248,8 @@
         document.getElementById('stopDiv').style.display = 'block';
     }
     // Update the current graph with new data
-    function updateChart() { 
+    function updateChart() {
+        var countDownSecond = document.getElementById('time_acq').value;
         d3.json('/data').then(_updateChart);
 
         function _updateChart(datapoints) {
@@ -251,14 +258,13 @@
             
             chart.data.datasets[0].data = amplitudeData;
             chart.data.labels = timeData;
-            chart.update();
+            chart.update('none');
         }
     };
 
     // Refresh the whole graph periodically
     function refreshGraph() {
-        showGraph();
-        setInterval(function() {
+        updateGraph = setInterval(function() {
             updateChart();
         }, 200);
     }
@@ -313,6 +319,7 @@
     function stopTimer() {
         // Reset countdown timer
         clearInterval(timer);
+        clearInterval(updateGraph);
 
         // Reset progress bar
         document.getElementById("progressBar").style.width = 0;
