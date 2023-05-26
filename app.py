@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 # Socket object
-async_mode = None
+# async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
 
 # Image processing object
