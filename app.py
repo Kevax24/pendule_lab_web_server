@@ -12,7 +12,7 @@ app.secret_key = secrets.token_hex(16)
 socketio = SocketIO(app)
 
 # Image processing object
-measure_from_video = image_processing.measure_from_video.MeasureFromVideo('../Data/Videos_pendule/filename1.avi')
+measure_from_video = image_processing.measure_from_video.MeasureFromVideo('data/videos_pendule/video_robustness.avi')
 
 # Global variables
 ip_login = None
