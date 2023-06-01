@@ -7,6 +7,8 @@ import os
 # App object
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
+website_url = 'pendule1.lab:5000'
+app.config['SERVER_NAME'] = website_url
 
 # Socket object
 async_mode = None
