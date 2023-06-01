@@ -1,4 +1,5 @@
 import cv2
+import time
 
 from image_processing.angle_detection import AngleDetection, export_to_csv
 
@@ -28,6 +29,8 @@ class MeasureFromVideo:
         self.count = 0
         angle_detection = AngleDetection()
         vidcap = cv2.VideoCapture(self.video_file)
+        vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         fps = vidcap.get(cv2.CAP_PROP_FPS)
         frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.signal = [[None, round(f / fps, 3)] for f in range(frame_count)]    # Initialize the signal with the good size
@@ -36,12 +39,15 @@ class MeasureFromVideo:
         success,image = vidcap.read()
         
         while success and self.state:
+            image_start = time.time()
             edges = angle_detection.preprocess_image(image)
             angle_deg = angle_detection.detect_lines(image, edges)
             time_sec = round(self.count / fps, 3)
             self.signal[self.count] = [angle_deg, time_sec]
             self.count += 1
             success,image = vidcap.read()
+            last = time.time()
+            print(f"Time by image: {last-image_start:.3f}s")
   
         vidcap.release()
 

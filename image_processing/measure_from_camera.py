@@ -24,6 +24,8 @@ class MeasureFromCamera:
         self.signal = []
         angle_detection = AngleDetection()
         vidcap = cv2.VideoCapture(self.device_id, cv2.CAP_DSHOW)
+        vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         self.state = True   # State of the video measuring
         
         # We need to check if camera
@@ -36,12 +38,14 @@ class MeasureFromCamera:
         start= time.time()
         last= time.time()
         while (last-start < measure_seconds) and success and self.state:
+            image_start = time.time()
             time_sec = round(last-start, 3)
             edges = angle_detection.preprocess_image(image)
             angle_deg = angle_detection.detect_lines(image, edges)
             self.signal.append([angle_deg, time_sec])
             success,image = vidcap.read()
             last = time.time()
+            print(f"Time by image: {last-image_start:.3f}s")
   
         vidcap.release()
 
