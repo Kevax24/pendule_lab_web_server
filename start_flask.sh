@@ -7,4 +7,4 @@ export FLASK_DEBUG=false
 export FLASK_ENV=production
 export SERVER_NAME='pendule1.local:5000'
 
-flask run --host=0.0.0.0
+flask run --host=pendule1
