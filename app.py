@@ -187,6 +187,7 @@ def run_lengthy_task(data):
         duration = int(data['duration'])
 
         # Run measures from video
+        # measure_from_video.run()  # To run tests on videos
         measure_from_video.run(duration)
 
         btnState = True
