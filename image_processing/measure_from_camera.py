@@ -1,16 +1,16 @@
 import cv2
 import time
 
-from angle_detection import AngleDetection, export_to_csv
+from image_processing.angle_detection import AngleDetection, export_to_csv
 
 class MeasureFromCamera:
 
-    def __init__(self, device_id=0, image_res=(320, 240)) -> None:
+    def __init__(self, device_id=0) -> None:
         '''
         Get the camera informations.
         '''
         self.device_id = device_id
-        self.image_res = image_res
+        self.signal = []
         
     def early_stopping(self):
         '''
@@ -22,11 +22,15 @@ class MeasureFromCamera:
         '''
         This function read every image of the video and detect the angle of the pendulum.
         '''
+        count = 0
         self.signal = []
         angle_detection = AngleDetection()
         vidcap = cv2.VideoCapture(self.device_id, cv2.CAP_DSHOW)
         vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        fps = 30
+        vidcap.set(cv2.CAP_PROP_FPS, fps)
+        self.signal = [[None, round(f / fps, 3)] for f in range(measure_seconds*fps)]
         self.state = True   # State of the video measuring
         
         # We need to check if camera
@@ -39,14 +43,16 @@ class MeasureFromCamera:
         start= time.time()
         last= time.time()
         while (last-start < measure_seconds) and success and self.state:
-            image_start = time.time()
-            time_sec = round(last-start, 3)
             edges = angle_detection.preprocess_image(image)
             angle_deg = angle_detection.detect_lines(image, edges)
-            self.signal.append([angle_deg, time_sec])
+            time_sec = round(last-start, 3)
+            self.signal[count] = [angle_deg, time_sec]
+            count += 1
             success,image = vidcap.read()
             last = time.time()
-            print(f"Time by image: {last-image_start:.3f}s")
+        
+        # Truncate the signal at the current time
+        self.signal = self.signal[:count]
   
         vidcap.release()
 

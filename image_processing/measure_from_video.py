@@ -1,5 +1,4 @@
 import cv2
-import time
 
 from image_processing.angle_detection import AngleDetection, export_to_csv
 
@@ -10,7 +9,6 @@ class MeasureFromVideo:
         Get the video informations.
         '''
         self.video_file = video_file
-        self.count = 0
         self.signal = []
         
     def early_stopping(self):
@@ -18,36 +16,33 @@ class MeasureFromVideo:
         This function can be called to stop the acquisition earlier.
         '''
         self.state = False
-
-        # Truncate the signal at the current time
-        self.signal = self.signal[:self.count]
         
     def run(self):
         '''
         This function read every image of the video and detect the angle of the pendulum.
         '''
-        self.count = 0
+        count = 0
         angle_detection = AngleDetection()
         vidcap = cv2.VideoCapture(self.video_file)
         vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         fps = vidcap.get(cv2.CAP_PROP_FPS)
         frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.signal = [[None, round(f / fps, 3)] for f in range(frame_count)]    # Initialize the signal with the good size
+        self.signal = [[None, round(f / fps, 3)] for f in range(frame_count)]
         self.state = True   # State of the video measuring
         
         success,image = vidcap.read()
         
         while success and self.state:
-            image_start = time.time()
             edges = angle_detection.preprocess_image(image)
             angle_deg = angle_detection.detect_lines(image, edges)
-            time_sec = round(self.count / fps, 3)
-            self.signal[self.count] = [angle_deg, time_sec]
-            self.count += 1
+            time_sec = round(count / fps, 3)
+            self.signal[count] = [angle_deg, time_sec]
+            count += 1
             success,image = vidcap.read()
-            last = time.time()
-            print(f"Time by image: {last-image_start:.3f}s")
+        
+        # Truncate the signal at the current time
+        self.signal = self.signal[:count]
   
         vidcap.release()
 

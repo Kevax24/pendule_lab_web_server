@@ -96,8 +96,6 @@
 
         // Start button clicked
         $('#btnStart').click(function() {
-            countdownTimer();
-
             // Update text displayed
             document.getElementById('acqRunning').style.display = 'block';
             document.getElementById('acqDone').style.display = 'none';
@@ -114,6 +112,9 @@
 
             // Start displaying the graph
             showGraph();
+
+            // Start the timer
+            countdownTimer();
 
             // Get time of acquisition
             var timeValue = document.getElementById('time_acq').value
@@ -266,7 +267,7 @@
     function refreshGraph() {
         updateGraph = setInterval(function() {
             updateChart();
-        }, 1000);
+        }, 100);
     }
 </script>
 
@@ -280,7 +281,10 @@
         document.getElementById('progress').style.display = 'block';
 
         // Set the date we're counting down to
-        var countDownSecond = document.getElementById('time_acq').value;
+        var countDownSecond = Number(document.getElementById('time_acq').value);
+
+        // Add 2.5 sec to let the camera initialize itself
+        countDownSecond += 2;
         let width = 0;
 
         // Check if the current progressBar width has been previously saved (to retrieve the value in case of a page refresh)
