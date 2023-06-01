@@ -23,6 +23,7 @@ class MeasureFromCamera:
         This function read every image of the video and detect the angle of the pendulum.
         '''
         count = 0
+        self.state = True   # State of the video measuring
         self.signal = []
         angle_detection = AngleDetection()
         vidcap = cv2.VideoCapture(self.device_id, cv2.CAP_DSHOW)
@@ -31,7 +32,6 @@ class MeasureFromCamera:
         fps = 30
         vidcap.set(cv2.CAP_PROP_FPS, fps)
         self.signal = [[None, round(f / fps, 3)] for f in range(measure_seconds*fps)]
-        self.state = True   # State of the video measuring
         
         # We need to check if camera
         # is opened previously or not

@@ -22,6 +22,7 @@ class MeasureFromVideo:
         This function read every image of the video and detect the angle of the pendulum.
         '''
         count = 0
+        self.state = True   # State of the video measuring
         angle_detection = AngleDetection()
         vidcap = cv2.VideoCapture(self.video_file)
         vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -29,7 +30,6 @@ class MeasureFromVideo:
         fps = vidcap.get(cv2.CAP_PROP_FPS)
         frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.signal = [[None, round(f / fps, 3)] for f in range(frame_count)]
-        self.state = True   # State of the video measuring
         
         success,image = vidcap.read()
         

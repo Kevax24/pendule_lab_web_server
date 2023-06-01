@@ -187,7 +187,7 @@ def run_lengthy_task(data):
         duration = int(data['duration'])
 
         # Run measures from video
-        measure_from_video.run()
+        measure_from_video.run(duration)
 
         btnState = True
         plotReady = True
