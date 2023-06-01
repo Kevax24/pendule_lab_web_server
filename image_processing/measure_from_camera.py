@@ -21,7 +21,7 @@ class MeasureFromCamera:
         '''
         This function read every image of the video and detect the angle of the pendulum.
         '''
-        self.ssignal = []
+        self.signal = []
         angle_detection = AngleDetection()
         vidcap = cv2.VideoCapture(self.device_id, cv2.CAP_DSHOW)
         self.state = True   # State of the video measuring
@@ -39,13 +39,13 @@ class MeasureFromCamera:
             time_sec = round(last-start, 3)
             edges = angle_detection.preprocess_image(image)
             angle_deg = angle_detection.detect_lines(image, edges)
-            self.ssignal.append([angle_deg, time_sec])
+            self.signal.append([angle_deg, time_sec])
             success,image = vidcap.read()
             last = time.time()
   
         vidcap.release()
 
-        export_to_csv(self.ssignal, "mesure.csv")
+        export_to_csv(self.signal, "mesure.csv")
 
         print("The signal was successfully saved")
 
