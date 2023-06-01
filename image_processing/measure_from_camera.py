@@ -40,7 +40,6 @@ class MeasureFromCamera:
         last= time.time()
         while (last-start < measure_seconds) and success and self.state:
             image_start = time.time()
-            image = cv2.resize(image, self.image_res, interpolation = cv2.INTER_NEAREST)
             time_sec = round(last-start, 3)
             edges = angle_detection.preprocess_image(image)
             angle_deg = angle_detection.detect_lines(image, edges)

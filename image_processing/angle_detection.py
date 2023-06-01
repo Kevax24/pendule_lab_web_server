@@ -7,7 +7,10 @@ class AngleDetection:
     def __init__(self) -> None:
         self.prev_angle = 0.0
         
-    def preprocess_image(self, image):
+    def preprocess_image(self, image, image_res=(320, 240)):
+        # Resize the image to half the resolution
+        image = cv2.resize(image, image_res)
+
         # Convert the image to the HSV format
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
