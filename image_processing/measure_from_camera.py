@@ -5,11 +5,12 @@ from angle_detection import AngleDetection, export_to_csv
 
 class MeasureFromCamera:
 
-    def __init__(self, device_id=0) -> None:
+    def __init__(self, device_id=0, image_res=(320, 240)) -> None:
         '''
         Get the camera informations.
         '''
         self.device_id = device_id
+        self.image_res = image_res
         
     def early_stopping(self):
         '''
@@ -39,6 +40,7 @@ class MeasureFromCamera:
         last= time.time()
         while (last-start < measure_seconds) and success and self.state:
             image_start = time.time()
+            image = cv2.resize(image, self.image_res, interpolation = cv2.INTER_NEAREST)
             time_sec = round(last-start, 3)
             edges = angle_detection.preprocess_image(image)
             angle_deg = angle_detection.detect_lines(image, edges)

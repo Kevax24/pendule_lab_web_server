@@ -15,7 +15,7 @@ class AngleDetection:
         satur = hsv[:,:,1]
 
         # Blur the image with a bilateral filter to remove noise
-        kernel_size = 9
+        kernel_size = 5
         blur = cv2.bilateralFilter(satur,kernel_size,50,100)
 
         # Apply a canny edge detector to extract the edge from the image
