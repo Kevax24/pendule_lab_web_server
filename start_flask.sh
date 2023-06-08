@@ -1,6 +1,6 @@
 #!/bin/sh
 
-python3 -m pip install -r requirements.txt
+pip install -r requirements.txt
 
 export FLASK_APP=app
 export FLASK_DEBUG=false
