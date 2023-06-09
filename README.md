@@ -6,7 +6,7 @@ This repository contains the implementation of a multidisciplinary master's proj
 
 **Password** : pendule
 
-## Specification
+## Specifications
 **Embedded system** :
 ```
 Raspberry Pi 4
