@@ -35,7 +35,7 @@ class MeasureFromVideo:
         
         while success and self.state:
             edges = angle_detection.preprocess_image(image)
-            angle_deg = angle_detection.detect_lines(image, edges)
+            angle_deg = angle_detection.detect_lines(edges)
             time_sec = round(count / fps, 3)
             self.signal[count] = [angle_deg, time_sec]
             count += 1

@@ -19,14 +19,14 @@ class AngleDetection:
 
         # Blur the image with a bilateral filter to remove noise
         kernel_size = 5
-        blur = cv2.bilateralFilter(satur,kernel_size,50,100)
+        blur = cv2.bilateralFilter(satur,kernel_size,50,50)
 
         # Apply a canny edge detector to extract the edge from the image
-        edges = cv2.Canny(blur,30,40,apertureSize = 3)
+        edges = cv2.Canny(blur,100,150,apertureSize = 3)
 
         return edges
 
-    def detect_lines(self, image, edges, max_angle = 15, line_lenght = 120, angle_precision = 0.1):
+    def detect_lines(self, edges, max_angle = 15, line_lenght = 60, angle_precision = 0.2):
         # Detect the lines woth the Hough transform
         lines = cv2.HoughLines(edges, 1, np.pi / 180 * angle_precision, line_lenght, None, 0, 0, -max_angle/180*np.pi, max_angle/180*np.pi)
 
@@ -35,32 +35,32 @@ class AngleDetection:
             lines = lines.reshape((len(lines), 2))
             rhos = lines[:,0]
             selected_lines = []
-            threshold = 50
+            threshold = 20
             
             # Select the line at the left
             min_rho = min(rhos)   # Pick the minimum rho
             left_rhos = rhos[:] < min_rho + threshold
             left_lines = lines[left_rhos]
-            # Pick the median angle value
+            # Pick the mean angle value
             thetas = left_lines[:,1]
-            average = np.median(thetas)
+            average = np.mean(thetas)
             # Select the closest line to that angle
             idx = (np.abs(thetas - average)).argmin()
             selected_lines.append(left_lines[idx])
             
             # Select the line at the right
-            min_rho = max(rhos)   # Pick the maximum rho
-            right_rhos = rhos[:] > min_rho - threshold
+            max_rho = max(rhos)   # Pick the maximum rho
+            right_rhos = rhos[:] > max_rho - threshold
             right_lines = lines[right_rhos]
-            # Pick the median angle value
+            # Pick the mean angle value
             thetas = right_lines[:,1]
-            average = np.median(thetas)
+            average = np.mean(thetas)
             # Select the closest line to that angle
             idx = (np.abs(thetas - average)).argmin()
             selected_lines.append(right_lines[idx])
     
             # Take the average of the two angles, convert the angle to degrees
-            angle_deg = sum([i[1] for i in selected_lines]) / len(selected_lines) * 180/np.pi
+            angle_deg = np.mean([i[1] for i in selected_lines]) * 180/np.pi
             # Round the angle for simplier exportation
             angle_deg = round(angle_deg, 2)
             self.prev_angle = angle_deg

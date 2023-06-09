@@ -44,7 +44,7 @@ class MeasureFromCamera:
         last= time.time()
         while (last-start < measure_seconds) and success and self.state:
             edges = angle_detection.preprocess_image(image)
-            angle_deg = angle_detection.detect_lines(image, edges)
+            angle_deg = angle_detection.detect_lines(edges)
             time_sec = round(last-start, 3)
             self.signal[count] = [angle_deg, time_sec]
             count += 1

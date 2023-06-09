@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, Response, jsonify
 from flask_socketio import SocketIO, emit
-import image_processing.measure_from_video
-import image_processing.measure_from_camera
+from image_processing.measure_from_video import MeasureFromVideo
+from image_processing.measure_from_camera import MeasureFromCamera
 import secrets
 import os
 
@@ -14,8 +14,8 @@ async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
 
 # Image processing object
-# measure_from_video = image_processing.measure_from_video.MeasureFromVideo('data/videos_pendule/video_robustness.avi')
-measure_from_video = image_processing.measure_from_camera.MeasureFromCamera(0)
+# measure_from_video = MeasureFromVideo('data/videos_pendule/video_robustness.avi')
+measure_from_video = MeasureFromCamera(0)
 
 # Global variables
 ip_login = None
