@@ -26,7 +26,7 @@ running = False
 
 # Users known
 users = [
-    {"name": "student", "pwd": "pendule"},
+    {"name": "student", "pwd": "pendule"}
 ]
 
 
