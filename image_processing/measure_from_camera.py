@@ -26,7 +26,7 @@ class MeasureFromCamera:
         self.state = True   # State of the video measuring
         self.signal = []
         angle_detection = AngleDetection()
-        vidcap = cv2.VideoCapture(self.device_id, cv2.CAP_DSHOW)
+        vidcap = cv2.VideoCapture(self.device_id)
         vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         fps = 30
